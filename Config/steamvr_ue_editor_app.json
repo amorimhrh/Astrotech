@@ -1,0 +1,18 @@
+{
+	"source": "UE",
+	"applications": [
+		{
+			"app_key": "application.generated.ue.astrotech-15228867.ue4editor.exe",
+			"launch_type": "url",
+			"url": "steam://launch/",
+			"action_manifest_path": "D:/Projects/Unreal Projects/UE 4.26 RTM/MarchingCubes/MarchingCubes 4.26/Config/SteamVRBindings/steamvr_manifest.json",
+			"strings":
+			{
+				"en_us":
+				{
+					"name": "Astrotech-15228867 [UE Editor]"
+				}
+			}
+		}
+	]
+}

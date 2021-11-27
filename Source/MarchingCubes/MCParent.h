@@ -18,6 +18,9 @@ class MARCHINGCUBES_API AMCParent : public AActor
 		bool bCreateOnlyOne;
 
 	UPROPERTY(EditAnywhere)
+		bool bCreateOnlyOnce;
+
+	UPROPERTY(EditAnywhere)
 		FVector SingleChunkSpawnLocation;
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "0", UIMin = "0", ClampMax = "32", UIMax = "32"))
@@ -42,22 +45,26 @@ class MARCHINGCUBES_API AMCParent : public AActor
 		FVector ChunkSpawnOffset;
 
 	UPROPERTY(EditAnywhere)
-		int32 PlateauHeight;
+		double MinimumCutoff;
 
 	UPROPERTY(EditAnywhere)
-		int32 PlateauTotalHeight;
-		
-	UPROPERTY(EditAnywhere)
-		double PlateauIntensity;
-		
-	UPROPERTY(EditAnywhere)
-		double PlateauBias;
+		double MaximumCutoff;
 
 	UPROPERTY(EditAnywhere)
-		double SedimentaryWeight;
+		double CutoffPower;
 
 	UPROPERTY(EditAnywhere)
-		double SedimentaryFrequency;
+		double BaseHeight;
+
+	UPROPERTY(EditAnywhere)
+		double WalkHeight;
+
+
+	UPROPERTY(EditAnywhere)
+		double SedimentWeight;
+
+	UPROPERTY(EditAnywhere)
+		double SedimentFrequency;
 	
 public:	
 	// Sets default values for this actor's properties

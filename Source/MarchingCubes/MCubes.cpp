@@ -92,7 +92,7 @@ void AMCubes::Tick(float DeltaTime)
 		{
 			// UE_LOG(LogClass, Warning, TEXT("Trying to create mesh!"));
 			// Mesh->ClearAllMeshSections();
-			UE_LOG(LogClass, Warning, TEXT("Entering creation."));
+			// UE_LOG(LogClass, Warning, TEXT("Entering creation."));
 			AMCubes::CreateTriangle();
 			// ChunkList->Add(GetActorLocation(), this);
 		}
@@ -153,7 +153,7 @@ void AMCubes::CreateTriangle(/*const FVector& OriginPoint, const TArray<FVector>
 
 	StaticProvider->SetupMaterialSlot(0, TEXT("Mat"), MeshMaterial);
 
-	UE_LOG(LogClass, Warning, TEXT("Creating mesh section."));
+	// UE_LOG(LogClass, Warning, TEXT("Creating mesh section."));
 
 	StaticProvider->CreateSectionFromComponents(0, 0, 0, MeshTris, MeshTriIndices, MeshNorms, MeshUVs, VertexColors, MeshTans, ERuntimeMeshUpdateFrequency::Infrequent, true);
 
@@ -196,7 +196,7 @@ void AMCubes::BeginMarch()
 
 				if(PercentageDone > LastPercent)
 				{
-					UE_LOG(LogClass, Warning, TEXT("%.2f%% complete! %i/%i marches done."), PercentageDone, MarchesDone, MarchesToMake);
+					// UE_LOG(LogClass, Warning, TEXT("%.2f%% complete! %i/%i marches done."), PercentageDone, MarchesDone, MarchesToMake);
 					LastPercent += 0.25;
 				}
 
@@ -310,9 +310,9 @@ void AMCubes::BeginMarch()
 		
 	}
 
-	UE_LOG(LogClass, Warning, TEXT("100.00%% complete! %i/%i marches done."), MarchesToMake, MarchesToMake);
+	// UE_LOG(LogClass, Warning, TEXT("100.00%% complete! %i/%i marches done."), MarchesToMake, MarchesToMake);
 
-	UE_LOG(LogClass, Warning, TEXT("Vertices: %i"), TriVerts.Num());
+	// UE_LOG(LogClass, Warning, TEXT("Vertices: %i"), TriVerts.Num());
 
 	/*UE_LOG(LogClass, Warning, TEXT("Calculating tangents."));
 	AMCubes::CalculateTangentsForMeshCommented(TriVerts, TriInds, UVs, Norms, Tans);*/
@@ -339,13 +339,13 @@ float AMCubes::DensityFunction(const FVector& Point) const
 	const FVector2D PointBroken = FVector2D(Point.X / 101, Point.Y / 103);
 
 	// float Density = (-Point.Z / (*MicroChunkResolution)); // Creates flat ground;
-	float Density = -Point.Z / 100; // Creates flat ground;
+	float Density = 0;
 
-	for(int Index = 0; Index < 5; Index++)
+	for(int Index = 1; Index < 8; Index++)
 	{
 		if(RootParent->Frequencies.Num() > Index && RootParent->Amplitudes.Num() > Index)
 		{
-			Density += FMath::PerlinNoise2D(PointBroken   * RootParent->Frequencies[Index]) * RootParent->Amplitudes[Index];
+			Density += FMath::PerlinNoise2D(PointBroken * RootParent->Frequencies[Index]) * RootParent->Amplitudes[Index];
 		}
 		else
 		{
@@ -353,25 +353,38 @@ float AMCubes::DensityFunction(const FVector& Point) const
 		}
 	}
 
-	Density += FMath::PerlinNoise2D(PointBroken   * RootParent->Frequencies[0]) * RootParent->Amplitudes[0]; // First octave (sample) of noise
-	Density += FMath::PerlinNoise2D(PointBroken   * RootParent->Frequencies[1]) * RootParent->Amplitudes[1]; // Second octave (sample) of noise. It's important to double amplitude but reduce frequency by a value CLOSE to half, but not exactly, to avoid repetition
-	Density += FMath::PerlinNoise2D(PointBroken   * RootParent->Frequencies[2]) * RootParent->Amplitudes[2]; // Third octave (sample) of noise. It's recommended to go up to nine octaves, but I don't think UE will run fast with nine values.
-	Density += FMath::PerlinNoise2D(PointBroken   * RootParent->Frequencies[3]) * RootParent->Amplitudes[3];
-	Density += FMath::PerlinNoise2D(PointBroken   * RootParent->Frequencies[4]) * RootParent->Amplitudes[4];
-	Density += FMath::PerlinNoise2D(PointBroken   * RootParent->Frequencies[5]) * RootParent->Amplitudes[5];
-	Density += FMath::PerlinNoise2D(PointBroken   * RootParent->Frequencies[6]) * RootParent->Amplitudes[6];
-	Density += FMath::PerlinNoise2D(FVector2D(FMath::PerlinNoise1D(PointBroken.X), FMath::PerlinNoise1D(PointBroken.Y))* RootParent->Frequencies[7]) * RootParent->Amplitudes[7];
-	Density -= FMath::PerlinNoise3D(PointBroken3D * RootParent->Frequencies[8]) * RootParent->Amplitudes[8]; // 0.0078127f) * 128.0f;
+	Density += FMath::PerlinNoise2D(FVector2D(FMath::PerlinNoise1D(PointBroken.X), FMath::PerlinNoise1D(PointBroken.Y))* RootParent->Frequencies[8]) * RootParent->Amplitudes[8];
+	Density -= FMath::PerlinNoise3D(PointBroken3D * RootParent->Frequencies[9]) * RootParent->Amplitudes[9]; // 0.0078127f) * 128.0f;
 	
-	float PlateauValue = (*PlateauIntensity) * ((*PlateauHeight) * FMath::Floor(double((*PlateauTotalHeight) * FMath::PerlinNoise2D(PointBroken * RootParent->Frequencies[9]))/double(*PlateauHeight)));
-
-	Density /= PlateauValue < (*PlateauBias) ? 1 : PlateauValue;
+	double WalkingPerlinNoise = FMath::PerlinNoise2D(PointBroken * RootParent->Frequencies[10]) * RootParent->Amplitudes[10];
 	
-	Density += PlateauValue;
+	double WPNLevel = WalkingPerlinNoise < (*MinimumCutoff) ? (*MinimumCutoff) : (WalkingPerlinNoise > (*MaximumCutoff) ? (*MaximumCutoff) : WalkingPerlinNoise);
+	
+	double WalkingWeight = FMath::Pow(((WPNLevel - (*MinimumCutoff))/((*MaximumCutoff) - (*MinimumCutoff))), (*CutoffPower));
 
-	// Density *= ((*SedimentaryWeight) * FMath::PerlinNoise1D(PointBroken3D.Z * (*SedimentaryFrequency))) + 1;
+	Density += ((*SedimentWeight) * FMath::PerlinNoise1D(PointBroken3D.Z * (*SedimentFrequency)));
 
-	Density += ((*SedimentaryWeight) * FMath::PerlinNoise1D(PointBroken3D.Z * (*SedimentaryFrequency)));
+	Density *= WalkingWeight;
+
+	// if(FMath::RandRange(0,10000) == 5) { UE_LOG(LogClass, Warning, TEXT("WW Value: %f"), WalkingWeight) }
+
+	Density += (1 - WalkingWeight) * (*WalkHeight);
+
+	// Density += (*BaseHeight);
+
+	Density += FMath::PerlinNoise2D(PointBroken * RootParent->Frequencies[0]) * RootParent->Amplitudes[0];
+
+
+	
+	// float PlateauValue = (*PlateauIntensity) * ((*PlateauHeight) * FMath::Floor(double((*PlateauTotalHeight) * FMath::PerlinNoise2D(PointBroken * RootParent->Frequencies[9]))/double(*PlateauHeight)));
+
+	// Density /= PlateauValue < (*PlateauBias) ? 1 : PlateauValue;
+	
+	// Density += PlateauValue;
+
+	Density -= Point.Z / 100; // Creates flat ground;
+	// Density *= ((*SedimentWeight) * FMath::PerlinNoise1D(PointBroken3D.Z * (*SedimentFrequency))) + 1;
+
 
 	// Density -= FMath::PerlinNoise3D(PointBroken3D * 0.062476) * 16; // 0.0078127f) * 128.0f;
 	// Density += (cos(Point.X / (*MicroChunkResolution)0) * sin(Point.Y / (*MicroChunkResolution)0))*10;
@@ -389,7 +402,7 @@ MarchingCubesAlgorithm::MarchingCubesAlgorithm(AMCubes* ActorMeshIn)
  
 MarchingCubesAlgorithm::~MarchingCubesAlgorithm()
 {
-	UE_LOG(LogClass, Warning, TEXT("Leaving external thread."));
+	// UE_LOG(LogClass, Warning, TEXT("Leaving external thread."));
 	ActorMesh->bFinishedCalculations = true;
 	// UE_LOG(LogClass, Warning, TEXT("Finished march!"));
 }
@@ -442,7 +455,7 @@ void AMCubes::CalculateTangentsForMeshCommented(const TArray<FVector>& Vertices,
 
 		if(PercentageDone > Percentage)
 		{
-			UE_LOG(LogClass, Warning, TEXT("%.1f%% done iterating over triangles // %i/%i (Stage 1/3 of tangents)"), PercentageDone, TriIdx, NumTris);
+			// UE_LOG(LogClass, Warning, TEXT("%.1f%% done iterating over triangles // %i/%i (Stage 1/3 of tangents)"), PercentageDone, TriIdx, NumTris);
 			Percentage += 0.5;
 		}
 
@@ -541,7 +554,7 @@ void AMCubes::CalculateTangentsForMeshCommented(const TArray<FVector>& Vertices,
 
 		if(PercentageDone > Percentage)
 		{
-			UE_LOG(LogClass, Warning, TEXT("%.1f%% done iterating over vertices // %i/%i (Stage 2/3 of tangents)"), PercentageDone, VertxIdx, Vertices.Num());
+			// UE_LOG(LogClass, Warning, TEXT("%.1f%% done iterating over vertices // %i/%i (Stage 2/3 of tangents)"), PercentageDone, VertxIdx, Vertices.Num());
 			Percentage += 0.5;
 		}
 
@@ -583,7 +596,7 @@ void AMCubes::CalculateTangentsForMeshCommented(const TArray<FVector>& Vertices,
 
 		if(PercentageDone > Percentage)
 		{
-			UE_LOG(LogClass, Warning, TEXT("%.1f%% done normalizing tangents // %i/%i (Stage 3/3 of tangents)"), PercentageDone, VertxIdx, NumVerts);
+			// UE_LOG(LogClass, Warning, TEXT("%.1f%% done normalizing tangents // %i/%i (Stage 3/3 of tangents)"), PercentageDone, VertxIdx, NumVerts);
 			Percentage += 0.5;
 		}
 

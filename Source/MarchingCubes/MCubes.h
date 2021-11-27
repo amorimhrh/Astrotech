@@ -100,12 +100,13 @@ public:
 	TMap<FVector, AActor*>* ChunkList;
 	FVector* ChunkOffset;
 	int32* MicroChunkResolution; 
-	int32* PlateauHeight;
-	int32* PlateauTotalHeight;
-	double* PlateauIntensity;
-	double* PlateauBias;
-	double* SedimentaryWeight;
-	double* SedimentaryFrequency;
+	double* MinimumCutoff;
+	double* MaximumCutoff;
+	double* CutoffPower;
+	double* BaseHeight;
+	double* WalkHeight;
+	double* SedimentWeight;
+	double* SedimentFrequency;
 
 	// Variables for threads
 	AMCubes* Self;

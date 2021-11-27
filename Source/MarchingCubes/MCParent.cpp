@@ -102,11 +102,12 @@ void AMCParent::Tick(float DeltaTime)
 	}
 
 	if(bFirstFrame) { bFirstFrame = false; }
+	if(bCreateOnlyOnce) { AMCParent::SetActorTickEnabled(false); }
 }
 
 void AMCParent::SpawnMesh(const FVector& Location)
 {
-	UE_LOG(LogClass, Warning, TEXT("Spawning Mesh."));
+	// UE_LOG(LogClass, Warning, TEXT("Spawning Mesh."));
 	if(!bAlreadyCreated) { bAlreadyCreated = true; }
 	/*if(Chunks.Contains(Location)) 
 	{
@@ -129,18 +130,19 @@ void AMCParent::SpawnMesh(const FVector& Location)
 		CubeMesh->ChunkList = &Chunks;
 		CubeMesh->TriTable = &TriTable;
 		CubeMesh->EdgeTable = &EdgeTable;
-		CubeMesh->PlateauBias = &PlateauBias;
+		CubeMesh->BaseHeight = &BaseHeight;
+		CubeMesh->WalkHeight = &WalkHeight;
+		CubeMesh->CutoffPower = &CutoffPower;
 		CubeMesh->MeshMaterial = MeshMaterial;
-		CubeMesh->PlateauHeight = &PlateauHeight;
 		CubeMesh->MeshXDimension = ChunkSize + 1;
 		CubeMesh->MeshYDimension = ChunkSize + 1;
 		CubeMesh->MeshZDimension = ChunkSize + 1;
+		CubeMesh->MinimumCutoff = &MinimumCutoff;
+		CubeMesh->MaximumCutoff = &MaximumCutoff;
 		CubeMesh->ChunkOffset = &ChunkSpawnOffset;
 		CubeMesh->RenderDistance = &RenderDistance;
-		CubeMesh->PlateauIntensity = &PlateauIntensity;
-		CubeMesh->SedimentaryWeight = &SedimentaryWeight;
-		CubeMesh->PlateauTotalHeight = &PlateauTotalHeight;
-		CubeMesh->SedimentaryFrequency = &SedimentaryFrequency;
+		CubeMesh->SedimentWeight = &SedimentWeight;
+		CubeMesh->SedimentFrequency = &SedimentFrequency;
 		CubeMesh->MicroChunkResolution = &MicroChunkResolution;
 		CubeMesh->FinishSpawning(FTransform(Location));
 		// CubeMesh->SetOwner(this);

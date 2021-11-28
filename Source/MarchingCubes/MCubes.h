@@ -107,6 +107,7 @@ public:
 	double* WalkHeight;
 	double* SedimentWeight;
 	double* SedimentFrequency;
+	double* OverhangPresence;
 
 	// Variables for threads
 	AMCubes* Self;

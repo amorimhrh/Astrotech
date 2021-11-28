@@ -354,7 +354,6 @@ float AMCubes::DensityFunction(const FVector& Point) const
 	}
 
 	Density += FMath::PerlinNoise2D(FVector2D(FMath::PerlinNoise1D(PointBroken.X), FMath::PerlinNoise1D(PointBroken.Y))* RootParent->Frequencies[8]) * RootParent->Amplitudes[8];
-	Density -= FMath::PerlinNoise3D(PointBroken3D * RootParent->Frequencies[9]) * RootParent->Amplitudes[9]; // 0.0078127f) * 128.0f;
 	
 	double WalkingPerlinNoise = FMath::PerlinNoise2D(PointBroken * RootParent->Frequencies[10]) * RootParent->Amplitudes[10];
 	
@@ -362,7 +361,6 @@ float AMCubes::DensityFunction(const FVector& Point) const
 	
 	double WalkingWeight = FMath::Pow(((WPNLevel - (*MinimumCutoff))/((*MaximumCutoff) - (*MinimumCutoff))), (*CutoffPower));
 
-	Density += ((*SedimentWeight) * FMath::PerlinNoise1D(PointBroken3D.Z * (*SedimentFrequency)));
 
 	Density *= WalkingWeight;
 
@@ -371,6 +369,7 @@ float AMCubes::DensityFunction(const FVector& Point) const
 	Density += (1 - WalkingWeight) * (*WalkHeight);
 
 	// Density += (*BaseHeight);
+	Density -= (WalkingWeight + ((1 - WalkingWeight)*(*OverhangPresence))) * FMath::PerlinNoise3D(PointBroken3D * RootParent->Frequencies[9]) * RootParent->Amplitudes[9]; // 0.0078127f) * 128.0f;
 
 	Density += FMath::PerlinNoise2D(PointBroken * RootParent->Frequencies[0]) * RootParent->Amplitudes[0];
 
@@ -378,6 +377,7 @@ float AMCubes::DensityFunction(const FVector& Point) const
 	
 	// float PlateauValue = (*PlateauIntensity) * ((*PlateauHeight) * FMath::Floor(double((*PlateauTotalHeight) * FMath::PerlinNoise2D(PointBroken * RootParent->Frequencies[9]))/double(*PlateauHeight)));
 
+	Density += ((*SedimentWeight) * FMath::PerlinNoise1D(PointBroken3D.Z * (*SedimentFrequency)));
 	// Density /= PlateauValue < (*PlateauBias) ? 1 : PlateauValue;
 	
 	// Density += PlateauValue;

@@ -142,6 +142,7 @@ void AMCParent::SpawnMesh(const FVector& Location)
 		CubeMesh->ChunkOffset = &ChunkSpawnOffset;
 		CubeMesh->RenderDistance = &RenderDistance;
 		CubeMesh->SedimentWeight = &SedimentWeight;
+		CubeMesh->OverhangPresence = &OverhangPresence;
 		CubeMesh->SedimentFrequency = &SedimentFrequency;
 		CubeMesh->MicroChunkResolution = &MicroChunkResolution;
 		CubeMesh->FinishSpawning(FTransform(Location));

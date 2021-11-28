@@ -44,10 +44,10 @@ class MARCHINGCUBES_API AMCParent : public AActor
 	UPROPERTY(EditAnywhere)
 		FVector ChunkSpawnOffset;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, meta = (ClampMin = "0", UIMin = "0", ClampMax = "1", UIMax = "1"))
 		double MinimumCutoff;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, meta = (ClampMin = "0", UIMin = "0", ClampMax = "1", UIMax = "1"))
 		double MaximumCutoff;
 
 	UPROPERTY(EditAnywhere)
@@ -65,6 +65,9 @@ class MARCHINGCUBES_API AMCParent : public AActor
 
 	UPROPERTY(EditAnywhere)
 		double SedimentFrequency;
+
+	UPROPERTY(EditAnywhere, meta = (ClampMin = "0", UIMin = "0", ClampMax = "1", UIMax = "1"))
+		double OverhangPresence;
 	
 public:	
 	// Sets default values for this actor's properties

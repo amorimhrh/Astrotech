@@ -36,10 +36,10 @@ class MARCHINGCUBES_API AMCParent : public AActor
 		int8 RenderHeightMax = 16;
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "0", UIMin = "0", UIMax = "32"))
-		int32 ChunkSize = 8;
+		uint8 ChunkSize = 8;
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "1", UIMin = "1", ClampMax = "10000", UIMax = "10000"))
-		int32 MicroChunkResolution = 100; 
+		uint16 MicroChunkResolution = 100; 
 
 	UPROPERTY(EditAnywhere)
 		FVector ChunkSpawnOffset;
@@ -80,7 +80,7 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	void SpawnMesh(const FVector& Location);
+	void SpawnMesh(const FVector& Location, const int32& MicroResolution);
 	bool ArrayChanged(const TArray<float>& ArrayA, const TArray<float>& ArrayB) const;
 	APlayerCameraManager* CamMgr;
 
@@ -95,6 +95,7 @@ private:
 	TArray<uint16> EdgeTable;
 	TArray<FLookupCell> TriTable;
 	TMap<FVector, AActor*> Chunks;
+	TMap<FVector, uint16> ChunkResolutions;
 	TArray<FVector> OccupiedPositions;
 	FVector CameraChunkPosition, CameraLastChunkPosition;
 	TArray<float> LastFrequencies;

@@ -75,13 +75,13 @@ protected:
 public:	
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "2", UIMin = "2"))
-		uint32 MeshXDimension = 9; //MINIMUM SIZE MUST BE 2 (2^3 = 8 possible points)
+		uint8 MeshXDimension = 9; //MINIMUM SIZE MUST BE 2 (2^3 = 8 possible points)
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "2", UIMin = "2"))
-		uint32 MeshYDimension = 9; //MINIMUM SIZE MUST BE 2 (2^3 = 8 possible points)
+		uint8 MeshYDimension = 9; //MINIMUM SIZE MUST BE 2 (2^3 = 8 possible points)
 		
 	UPROPERTY(EditAnywhere, meta = (ClampMin = "2", UIMin = "2"))
-		uint32 MeshZDimension = 9; //MINIMUM SIZE MUST BE 2 (2^3 = 8 possible points)
+		uint8 MeshZDimension = 9; //MINIMUM SIZE MUST BE 2 (2^3 = 8 possible points)
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	void CreateTriangle(/*const FVector& OriginPoint, const TArray<FVector>& VertexList*/);
@@ -99,7 +99,7 @@ public:
 	AMCParent* RootParent;
 	TMap<FVector, AActor*>* ChunkList;
 	FVector* ChunkOffset;
-	int32* MicroChunkResolution; 
+	uint16 MicroChunkResolution; 
 	double* MinimumCutoff;
 	double* MaximumCutoff;
 	double* CutoffPower;

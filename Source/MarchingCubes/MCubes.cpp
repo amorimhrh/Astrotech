@@ -3,6 +3,7 @@
 
 // Math Utilities
 #include "Math/UnrealMathUtility.h" 
+#include "GenericPlatform/GenericPlatformMath.h"
 
 // Allow for lookup table that does not bloat compile time
 #include "Misc/FileHelper.h"
@@ -34,7 +35,7 @@ void AMCubes::BeginPlay()
 {
 	Super::BeginPlay();
 
-	FakeVolume = ((MeshXDimension * MeshYDimension * MeshZDimension)/3)*(*MicroChunkResolution);
+	FakeVolume = ((MeshXDimension * MeshYDimension * MeshZDimension)/3)*MicroChunkResolution;
 
 	LastSurfaceLevel = 0;
 
@@ -45,7 +46,7 @@ void AMCubes::BeginPlay()
 	// Sets current seconds counter to 0
 	Self = this;
 
-	// const FVector DebugOffset = FVector((MeshXDimension/2)*(*MicroChunkResolution), (MeshYDimension/2)*(*MicroChunkResolution), (MeshZDimension/2)*(*MicroChunkResolution));
+	// const FVector DebugOffset = FVector((MeshXDimension/2)*MicroChunkResolution, (MeshYDimension/2)*MicroChunkResolution, (MeshZDimension/2)*MicroChunkResolution);
 
 	// DrawDebugBox(AMCubes::GetWorld(), AMCubes::GetActorLocation() + DebugOffset, DebugOffset, FColor().Cyan, true, -1.f, (uint8)'\000', 5.f);
 
@@ -94,7 +95,13 @@ void AMCubes::Tick(float DeltaTime)
 			// Mesh->ClearAllMeshSections();
 			// UE_LOG(LogClass, Warning, TEXT("Entering creation."));
 			AMCubes::CreateTriangle();
-			// ChunkList->Add(GetActorLocation(), this);
+			if((*ChunkList).Contains(GetActorLocation())) 
+			{ 
+				AActor* ChunkToDelete = (*ChunkList)[GetActorLocation()];
+				ChunkList->Remove(GetActorLocation()); 
+				ChunkToDelete->Destroy();
+			}
+			ChunkList->Add(GetActorLocation(), this);
 		}
 		else
 		{
@@ -115,7 +122,7 @@ void AMCubes::Tick(float DeltaTime)
 void AMCubes::PostLoad()
 {
 	Super::PostLoad();
-	// AMCubes::CreateTriangle(FVector(0, 0, 0), {FVector(0, 0, 0), FVector(0, (*MicroChunkResolution), 0), FVector(0, 0, (*MicroChunkResolution))});
+	// AMCubes::CreateTriangle(FVector(0, 0, 0), {FVector(0, 0, 0), FVector(0, MicroChunkResolution, 0), FVector(0, 0, MicroChunkResolution)});
 }
 */
 
@@ -138,7 +145,7 @@ void AMCubes::CreateTriangle(/*const FVector& OriginPoint, const TArray<FVector>
 
 		// uint8 IndexMod = Index % 3;
 		// UV0.Add(FVector2D((IndexMod == 1 ? 1 : 0), (IndexMod == 2 ? 1 : 0)));
-		UV0.Add(FVector2D(PointToTri.X/(*MicroChunkResolution), PointToTri.Y/(*MicroChunkResolution)));
+		UV0.Add(FVector2D(PointToTri.X/MicroChunkResolution, PointToTri.Y/MicroChunkResolution));
 	}*/
 
 
@@ -172,13 +179,21 @@ void AMCubes::BeginMarch()
 	TArray<FVector2D> UVs;
 	TArray<int> TriInds;
 
-	uint32 MaxMarchesX = FMath::Floor(MeshXDimension*(100.0 / double(*MicroChunkResolution))) - 1;
-	uint32 MaxMarchesY = FMath::Floor(MeshYDimension*(100.0 / double(*MicroChunkResolution))) - 1;
-	uint32 MaxMarchesZ = FMath::Floor(MeshZDimension*(100.0 / double(*MicroChunkResolution))) - 1;
+	// uint32 MaxMarchesX = FMath::Floor(MeshXDimension*(100.0 / doubleMicroChunkResolution)) - 1;
+	// uint32 MaxMarchesY = FMath::Floor(MeshYDimension*(100.0 / doubleMicroChunkResolution)) - 1;
+	// uint32 MaxMarchesZ = FMath::Floor(MeshZDimension*(100.0 / doubleMicroChunkResolution)) - 1;
 
-	uint64 MarchesToMake = MaxMarchesX * MaxMarchesY * MaxMarchesZ;
+	uint32 MaxMarchesX = FGenericPlatformMath::CeilToInt(MeshXDimension*(100.0 / double(MicroChunkResolution)));
+	uint32 MaxMarchesY = FGenericPlatformMath::CeilToInt(MeshYDimension*(100.0 / double(MicroChunkResolution)));
+	uint32 MaxMarchesZ = FGenericPlatformMath::CeilToInt(MeshZDimension*(100.0 / double(MicroChunkResolution)));
 
-	double LastPercent = 0;
+	// uint32 MaxMarchesX = MeshXDimension - 1;// FMath::Floor(MeshXDimension*(100.0 / doubleMicroChunkResolution)) - 1;
+	// uint32 MaxMarchesY = MeshYDimension - 1;// FMath::Floor(MeshYDimension*(100.0 / doubleMicroChunkResolution)) - 1;
+	// uint32 MaxMarchesZ = MeshZDimension - 1;// FMath::Floor(MeshZDimension*(100.0 / doubleMicroChunkResolution)) - 1;
+
+	// uint64 MarchesToMake = MaxMarchesX * MaxMarchesY * MaxMarchesZ;
+
+	// double LastPercent = 0;
 
 	// Cycles through all Z planes
 	for(uint32 ZIndex = 0; ZIndex < MaxMarchesZ; ZIndex++)
@@ -190,15 +205,15 @@ void AMCubes::BeginMarch()
 			for (uint32 XIndex = 0; XIndex < MaxMarchesX; XIndex++)
 			{
 
-				uint64 MarchesDone = XIndex + (YIndex * MaxMarchesX) + (ZIndex * (MaxMarchesY * MaxMarchesX));
+				// uint64 MarchesDone = XIndex + (YIndex * MaxMarchesX) + (ZIndex * (MaxMarchesY * MaxMarchesX));
 
-				double PercentageDone = (double(MarchesDone)*100.0) / double(MarchesToMake);
+				// double PercentageDone = (double(MarchesDone)*100.0) / double(MarchesToMake);
 
-				if(PercentageDone > LastPercent)
+				/* if(PercentageDone > LastPercent)
 				{
 					// UE_LOG(LogClass, Warning, TEXT("%.2f%% complete! %i/%i marches done."), PercentageDone, MarchesDone, MarchesToMake);
 					LastPercent += 0.25;
-				}
+				}*/
 
 				FOccluderVertexArray MemberTriVerts/* , MemberNorms */;
 				// TArray<FProcMeshTangent> MemberTans;
@@ -207,7 +222,7 @@ void AMCubes::BeginMarch()
 
 				// FOccluderVertexArray TriVerts;
 				// Store current vector coordinate
-				FVector CurrentCoordinate = FVector(XIndex*(*MicroChunkResolution), YIndex*(*MicroChunkResolution), ZIndex*(*MicroChunkResolution));
+				FVector CurrentCoordinate = FVector(XIndex*MicroChunkResolution, YIndex*MicroChunkResolution, ZIndex*MicroChunkResolution);
 				// if (bRenderDebug) { DrawDebugSphere(AMCubes::GetWorld(), AMCubes::GetActorLocation() + (VoxelVertexCoordinate * AMCubes::GetActorScale3D()), 25, 10, (MCPoints[VoxelVertexCoordinate] >= SurfaceLevel) ? FColor::Emerald : FColor::Black, true); }
 
 				// UE_LOG(LogClass, Warning, TEXT("CurrentCoordinate = %s"), *CurrentCoordinate.ToString());
@@ -221,7 +236,7 @@ void AMCubes::BeginMarch()
 				// Cycles through each vertex in voxel
 				for (uint8 VoxelIndex = 0; VoxelIndex < 8; VoxelIndex++)
 				{
-					FVector VoxelVertexCoordinate = CurrentCoordinate + FVector((VoxelIndex & 1)*(*MicroChunkResolution), ((VoxelIndex & 2) >> 1)*(*MicroChunkResolution), ((VoxelIndex & 4) >> 2)*(*MicroChunkResolution));
+					FVector VoxelVertexCoordinate = CurrentCoordinate + FVector((VoxelIndex & 1)*MicroChunkResolution, ((VoxelIndex & 2) >> 1)*MicroChunkResolution, ((VoxelIndex & 4) >> 2)*MicroChunkResolution);
 
 					// UE_LOG(LogClass, Warning, TEXT("%i"), VoxelIndex & 1);
 					float DensityValue = AMCubes::DensityFunction(VoxelVertexCoordinate + AMCubes::GetActorLocation());
@@ -255,8 +270,8 @@ void AMCubes::BeginMarch()
 					FVector P1 = CurrentCoordinate, P2 = CurrentCoordinate;
 
 					// Avoids a switch case statement by assigning the specific values according to the edge index
-					P1 += FVector((((EdgeIndex + 1) & 2) >> 1) * (*MicroChunkResolution), ((EdgeIndex & 2) >> 1) * (*MicroChunkResolution), ((EdgeIndex & 4) >> 2) * (*MicroChunkResolution));
-					P2 += FVector(EdgeIndex < 8 ? (((EdgeIndex + 2) & 2) >> 1) * (*MicroChunkResolution) : (((EdgeIndex - 7) & 2) >> 1) * (*MicroChunkResolution), EdgeIndex < 8 ? (((EdgeIndex + 1) & 2) >> 1) * (*MicroChunkResolution) : (((EdgeIndex - 8) & 2) >> 1) * (*MicroChunkResolution), EdgeIndex < 8 ? ((EdgeIndex & 4) >> 2) * (*MicroChunkResolution) : (*MicroChunkResolution));
+					P1 += FVector((((EdgeIndex + 1) & 2) >> 1) * MicroChunkResolution, ((EdgeIndex & 2) >> 1) * MicroChunkResolution, ((EdgeIndex & 4) >> 2) * MicroChunkResolution);
+					P2 += FVector(EdgeIndex < 8 ? (((EdgeIndex + 2) & 2) >> 1) * MicroChunkResolution : (((EdgeIndex - 7) & 2) >> 1) * MicroChunkResolution, EdgeIndex < 8 ? (((EdgeIndex + 1) & 2) >> 1) * MicroChunkResolution : (((EdgeIndex - 8) & 2) >> 1) * MicroChunkResolution, EdgeIndex < 8 ? ((EdgeIndex & 4) >> 2) * MicroChunkResolution : MicroChunkResolution);
 
 					// TriangleVertices[EdgeIndex] = AMCubes::GetInterpolatedPosition(P1, P2, AMCubes::DensityFunction(P1), AMCubes::DensityFunction(P2));
 					TriangleVertices[EdgeIndex] = AMCubes::GetInterpolatedPosition(P1, P2, PointDensityMap[P1], PointDensityMap[P2]);
@@ -277,15 +292,15 @@ void AMCubes::BeginMarch()
 					// FOccluderVertexArray TriVerts;
 					MemberTriInds.Add(VertNum++);
 					MemberTriVerts.Add(TriangleVertices[TriTableValue[TriangleIndex]]/*  - AMCubes::GetActorLocation() */);
-					MemberUVs.Add(FVector2D(TriangleVertices[TriTableValue[TriangleIndex]].X/(*MicroChunkResolution), TriangleVertices[TriTableValue[TriangleIndex]].Y/(*MicroChunkResolution)));
+					MemberUVs.Add(FVector2D(TriangleVertices[TriTableValue[TriangleIndex]].X/MicroChunkResolution, TriangleVertices[TriTableValue[TriangleIndex]].Y/MicroChunkResolution));
 
 					MemberTriInds.Add(VertNum++);
 					MemberTriVerts.Add(TriangleVertices[TriTableValue[TriangleIndex + 1]]/*  - AMCubes::GetActorLocation() */);
-					MemberUVs.Add(FVector2D(TriangleVertices[TriTableValue[TriangleIndex + 1]].X/(*MicroChunkResolution), TriangleVertices[TriTableValue[TriangleIndex + 1]].Y/(*MicroChunkResolution)));
+					MemberUVs.Add(FVector2D(TriangleVertices[TriTableValue[TriangleIndex + 1]].X/MicroChunkResolution, TriangleVertices[TriTableValue[TriangleIndex + 1]].Y/MicroChunkResolution));
 
 					MemberTriInds.Add(VertNum++);
 					MemberTriVerts.Add(TriangleVertices[TriTableValue[TriangleIndex + 2]]/*  - AMCubes::GetActorLocation() */);
-					MemberUVs.Add(FVector2D(TriangleVertices[TriTableValue[TriangleIndex + 2]].X/(*MicroChunkResolution), TriangleVertices[TriTableValue[TriangleIndex + 2]].Y/(*MicroChunkResolution)));
+					MemberUVs.Add(FVector2D(TriangleVertices[TriTableValue[TriangleIndex + 2]].X/MicroChunkResolution, TriangleVertices[TriTableValue[TriangleIndex + 2]].Y/MicroChunkResolution));
 					// AMCubes::CreateTriangle(FVector(0, 0, 0), TriVerts);
 					// AMCubes::CalculateTangentsForMeshCommented(MemberTriVerts, MemberTriInds, MemberUVs, MemberNorms, MemberTans);
 					// TriVerts += MemberTriVerts;
@@ -338,7 +353,7 @@ float AMCubes::DensityFunction(const FVector& Point) const
 	const FVector PointBroken3D = Point / FVector(101,103,107);
 	const FVector2D PointBroken = FVector2D(Point.X / 101, Point.Y / 103);
 
-	// float Density = (-Point.Z / (*MicroChunkResolution)); // Creates flat ground;
+	// float Density = (-Point.Z / MicroChunkResolution); // Creates flat ground;
 	float Density = 0;
 
 	for(int Index = 1; Index < 8; Index++)
@@ -387,11 +402,11 @@ float AMCubes::DensityFunction(const FVector& Point) const
 
 
 	// Density -= FMath::PerlinNoise3D(PointBroken3D * 0.062476) * 16; // 0.0078127f) * 128.0f;
-	// Density += (cos(Point.X / (*MicroChunkResolution)0) * sin(Point.Y / (*MicroChunkResolution)0))*10;
+	// Density += (cos(Point.X / MicroChunkResolution0) * sin(Point.Y / MicroChunkResolution0))*10;
 	// Density += FMath::PerlinNoise2D(PointBroken * 0.06261f) * 16.0f;
 	// Density += FMath::PerlinNoise2D(PointBroken * 0.03124f) * 32.0f;
 	// Density += FMath::PerlinNoise2D(PointBroken * 0.015623f) * 64.0f;
-	// (-Point.Z / (*MicroChunkResolution)) + PNoise1 * FMath::PerlinNoise3D()
+	// (-Point.Z / MicroChunkResolution) + PNoise1 * FMath::PerlinNoise3D()
 	return Density;
 }
 

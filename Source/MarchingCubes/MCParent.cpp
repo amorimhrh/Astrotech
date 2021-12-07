@@ -5,6 +5,9 @@
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 
+// Math Utilities Again
+#include "Math/UnrealMathUtility.h"
+
 // Grabs camera manager
 #include "Kismet/GameplayStatics.h"
 
@@ -79,19 +82,33 @@ void AMCParent::Tick(float DeltaTime)
 				for(int8 ReadChunkX = -RenderDistance; ReadChunkX <= RenderDistance; ReadChunkX++)
 				{
 					// UE_LOG(LogClass, Warning, TEXT("Current position: %s // Chunk Location: %s"), *CamPosition.ToString(), *ChunkLocation.ToString());
-					FVector NewChunkPos = FVector(ReadChunkX*(ChunkSize * MicroChunkResolution), ReadChunkY*(ChunkSize * MicroChunkResolution), ReadChunkZ*(ChunkSize * MicroChunkResolution)) + CameraChunkPosition + (ChunkSpawnOffset * (ChunkSize * MicroChunkResolution));
+					// FVector NewChunkPos = FVector(ReadChunkX*(ChunkSize * MicroChunkResolution), ReadChunkY*(ChunkSize * MicroChunkResolution), ReadChunkZ*(ChunkSize * MicroChunkResolution)) + CameraChunkPosition + (ChunkSpawnOffset * (ChunkSize * MicroChunkResolution));
+					FVector NewChunkPos = FVector(ReadChunkX*ChunkSize*100, ReadChunkY*ChunkSize*100, ReadChunkZ*ChunkSize*100) + CameraChunkPosition + (ChunkSpawnOffset * ChunkSize*100);
 					
 					if(bCreateOnlyOne) 
 					{ 
 						NewChunkPos = SingleChunkSpawnLocation;
 						UE_LOG(LogClass, Warning, TEXT("Chunk Pos: %s (%.2f // %.1f)"), *(NewChunkPos.ToString()), CamPosition.Z, AMCParent::GetWorld()->TimeSeconds);
 					}
+
+					float DistCamChunk = FGenericPlatformMath::Sqrt(FMath::Square(CamPosition.X - NewChunkPos.X) + FMath::Square(CamPosition.Y - NewChunkPos.Y) + FMath::Square(CamPosition.Z - NewChunkPos.Z));
+					int32 Res = DistCamChunk > 5000 ? FMath::Floor(((0.0002*DistCamChunk)*MicroChunkResolution)/10.0)*10 : MicroChunkResolution;
 					
 					// UE_LOG(LogClass, Warning, TEXT("New Chunk Pos: %s\nCam Chunk Pos: %s"), *(NewChunkPos.ToCompactString()), *(CameraChunkPosition.ToCompactString()));
 					if(!OccupiedPositions.Contains(NewChunkPos))
 					{
 						if(!bCreateOnlyOne) { OccupiedPositions.Add(NewChunkPos); }
-						AMCParent::SpawnMesh(NewChunkPos);
+						AMCParent::SpawnMesh(NewChunkPos, Res);
+						ChunkResolutions.Add(NewChunkPos, Res);
+					}
+					else if(ChunkResolutions.Contains(NewChunkPos))
+					{
+						if(ChunkResolutions[NewChunkPos] != Res)
+						{
+							if(!bCreateOnlyOne) { OccupiedPositions.Add(NewChunkPos); }
+							AMCParent::SpawnMesh(NewChunkPos, Res);
+							ChunkResolutions.Add(NewChunkPos, Res);
+						}
 					}
 				}	
 			}
@@ -105,7 +122,7 @@ void AMCParent::Tick(float DeltaTime)
 	if(bCreateOnlyOnce) { AMCParent::SetActorTickEnabled(false); }
 }
 
-void AMCParent::SpawnMesh(const FVector& Location)
+void AMCParent::SpawnMesh(const FVector& Location, const int32& MicroResolution)
 {
 	// UE_LOG(LogClass, Warning, TEXT("Spawning Mesh."));
 	if(!bAlreadyCreated) { bAlreadyCreated = true; }
@@ -144,7 +161,7 @@ void AMCParent::SpawnMesh(const FVector& Location)
 		CubeMesh->SedimentWeight = &SedimentWeight;
 		CubeMesh->OverhangPresence = &OverhangPresence;
 		CubeMesh->SedimentFrequency = &SedimentFrequency;
-		CubeMesh->MicroChunkResolution = &MicroChunkResolution;
+		CubeMesh->MicroChunkResolution = MicroResolution;
 		CubeMesh->FinishSpawning(FTransform(Location));
 		// CubeMesh->SetOwner(this);
 		// Chunks.Add(Location, CubeMesh);

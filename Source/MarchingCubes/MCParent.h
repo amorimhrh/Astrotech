@@ -97,6 +97,7 @@ private:
 	TMap<FVector, AActor*> Chunks;
 	TMap<FVector, uint16> ChunkResolutions;
 	TArray<FVector> OccupiedPositions;
+	TArray<FVector> IgnorePositions;
 	FVector CameraChunkPosition, CameraLastChunkPosition;
 	TArray<float> LastFrequencies;
 	TArray<float> LastAmplitudes;

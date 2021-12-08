@@ -36,9 +36,6 @@ void AMCParent::BeginPlay()
 	{
 		EdgeTable.Add(FParse::HexNumber(*ETCell));
 	}
-
-	// UE_LOG(LogClass, Warning, TEXT("EdgeTableCells TArray Length: %i // EdgeTable Length: %i"), EdgeTableCells.Num(), EdgeTable.Num());
-
 	// Loads triangle lookup table
 	const FString TriTablePath = FPaths::ProjectContentDir() + TEXT("LookupTable/tritable.txt");
 	TArray<FString> TriTableCells;
@@ -71,48 +68,99 @@ void AMCParent::Tick(float DeltaTime)
 	CameraChunkPosition = FVector(FMath::FloorToInt(CamPosition.X / (ChunkSize * MicroChunkResolution)) * (ChunkSize * MicroChunkResolution), FMath::FloorToInt(CamPosition.Y / (ChunkSize * MicroChunkResolution)) * (ChunkSize * MicroChunkResolution), FMath::FloorToInt(CamPosition.Z / (ChunkSize * MicroChunkResolution)) * (ChunkSize * MicroChunkResolution));
 	if((CameraLastChunkPosition != CameraChunkPosition || bArraysChanged || bFirstFrame) && ((!bAlreadyCreated && bCreateOnlyOne) || !bCreateOnlyOne))
 	{
-		for(int8 ReadChunkZ = -RenderDistance; ReadChunkZ <= RenderDistance; ReadChunkZ++)
-		{
-			if(bLimitRenderHeight && (ReadChunkZ < RenderHeightMin || ReadChunkZ > RenderHeightMax) && !bCreateOnlyOne)
-			{
-				continue;
-			}
-			for(int8 ReadChunkY = -RenderDistance; ReadChunkY <= RenderDistance; ReadChunkY++)
-			{
-				for(int8 ReadChunkX = -RenderDistance; ReadChunkX <= RenderDistance; ReadChunkX++)
-				{
-					// UE_LOG(LogClass, Warning, TEXT("Current position: %s // Chunk Location: %s"), *CamPosition.ToString(), *ChunkLocation.ToString());
-					// FVector NewChunkPos = FVector(ReadChunkX*(ChunkSize * MicroChunkResolution), ReadChunkY*(ChunkSize * MicroChunkResolution), ReadChunkZ*(ChunkSize * MicroChunkResolution)) + CameraChunkPosition + (ChunkSpawnOffset * (ChunkSize * MicroChunkResolution));
-					FVector NewChunkPos = FVector(ReadChunkX*ChunkSize*100, ReadChunkY*ChunkSize*100, ReadChunkZ*ChunkSize*100) + CameraChunkPosition + (ChunkSpawnOffset * ChunkSize*100);
-					
-					if(bCreateOnlyOne) 
-					{ 
-						NewChunkPos = SingleChunkSpawnLocation;
-						UE_LOG(LogClass, Warning, TEXT("Chunk Pos: %s (%.2f // %.1f)"), *(NewChunkPos.ToString()), CamPosition.Z, AMCParent::GetWorld()->TimeSeconds);
-					}
+		int8 XValue = 0, YValue = 0, ZValue = 0;
+		uint8 LoopState = 0, MaxVal = 1;
+		uint32 Iter = 0;
+		TArray<FVector> VisitedChunks;
+		bool bFinishedCircling = false;
 
-					float DistCamChunk = FGenericPlatformMath::Sqrt(FMath::Square(CamPosition.X - NewChunkPos.X) + FMath::Square(CamPosition.Y - NewChunkPos.Y) + FMath::Square(CamPosition.Z - NewChunkPos.Z));
-					int32 Res = DistCamChunk > 5000 ? FMath::Floor(((0.0002*DistCamChunk)*MicroChunkResolution)/10.0)*10 : MicroChunkResolution;
+
+		while(!bFinishedCircling || Iter < 3)
+		{
+			// Save chunk coordinate to variable
+
+			FVector ChunkCoord = FVector(XValue, YValue, ZValue);
+
+			// Is this chunk valid?
+
+			if(!(bLimitRenderHeight && (ZValue < RenderHeightMin || ZValue > RenderHeightMax)) && !IgnorePositions.Contains(ChunkCoord))
+			{
+				// It is! So, generate chunk
+
+				FVector NewChunkPos = FVector(XValue*ChunkSize*100, YValue*ChunkSize*100, ZValue*ChunkSize*100) + CameraChunkPosition + (ChunkSpawnOffset * ChunkSize*100);
 					
-					// UE_LOG(LogClass, Warning, TEXT("New Chunk Pos: %s\nCam Chunk Pos: %s"), *(NewChunkPos.ToCompactString()), *(CameraChunkPosition.ToCompactString()));
-					if(!OccupiedPositions.Contains(NewChunkPos))
+				if(bCreateOnlyOne) 
+				{ 
+					NewChunkPos = SingleChunkSpawnLocation;
+				}
+
+				float DistCamChunk = FGenericPlatformMath::Sqrt(FMath::Square(CameraChunkPosition.X - NewChunkPos.X) + FMath::Square(CameraChunkPosition.Y - NewChunkPos.Y));
+				int32 Res = DistCamChunk > 5000 ? FMath::Floor(((0.0002*DistCamChunk)*MicroChunkResolution)/10.0)*10 : MicroChunkResolution;
+				
+				if(!OccupiedPositions.Contains(NewChunkPos))
+				{
+					if(!bCreateOnlyOne) { OccupiedPositions.Add(NewChunkPos); }
+					AMCParent::SpawnMesh(NewChunkPos, Res);
+					ChunkResolutions.Add(NewChunkPos, Res);
+				}
+				else if(ChunkResolutions.Contains(NewChunkPos))
+				{
+					if(ChunkResolutions[NewChunkPos] != Res)
 					{
 						if(!bCreateOnlyOne) { OccupiedPositions.Add(NewChunkPos); }
 						AMCParent::SpawnMesh(NewChunkPos, Res);
 						ChunkResolutions.Add(NewChunkPos, Res);
 					}
-					else if(ChunkResolutions.Contains(NewChunkPos))
-					{
-						if(ChunkResolutions[NewChunkPos] != Res)
-						{
-							if(!bCreateOnlyOne) { OccupiedPositions.Add(NewChunkPos); }
-							AMCParent::SpawnMesh(NewChunkPos, Res);
-							ChunkResolutions.Add(NewChunkPos, Res);
-						}
-					}
-				}	
+				}
+
+				// Since we visited it, add it to the list
+				VisitedChunks.Add(ChunkCoord);
 			}
+
+			// Update Z value
+			ZValue = ZValue == 0 ? -1 : (ZValue < 0 ? -ZValue : -ZValue - 1);
+
+			// Have we visited all valid Z positions?
+			if(-ZValue > RenderDistance || (bLimitRenderHeight && (ZValue < RenderHeightMin || ZValue > RenderHeightMax)))
+			{
+				// Yes! Reset Z
+
+				ZValue = 0;
+
+				// Check Loop State to see which variable must change
+
+				if(XValue == MaxVal && LoopState == 0) { LoopState = 1; }
+				else if(YValue == MaxVal && LoopState == 1) { LoopState = 2; }
+				else if(XValue == -MaxVal && LoopState == 2) { LoopState = 3; }
+				else if(YValue == -MaxVal && LoopState == 3) { LoopState = 0; MaxVal++; }
+
+				// Deal with variable change
+
+				switch(LoopState)
+				{
+					case 0:
+						XValue++;
+						break;
+						
+					case 1:
+						YValue++;
+						break;
+
+					case 2:
+						XValue--;
+						break;
+
+					case 3:
+						YValue--;
+						break;
+				}
+			}
+
+			if(XValue > RenderDistance) { break; }
+
+			if(bCreateOnlyOne) { break; }
 		}
+
 		CameraLastChunkPosition = CameraChunkPosition;
 		LastFrequencies = Frequencies;
 		LastAmplitudes = Amplitudes;
@@ -159,6 +207,7 @@ void AMCParent::SpawnMesh(const FVector& Location, const int32& MicroResolution)
 		CubeMesh->ChunkOffset = &ChunkSpawnOffset;
 		CubeMesh->RenderDistance = &RenderDistance;
 		CubeMesh->SedimentWeight = &SedimentWeight;
+		CubeMesh->IgnorePositions = &IgnorePositions;
 		CubeMesh->OverhangPresence = &OverhangPresence;
 		CubeMesh->SedimentFrequency = &SedimentFrequency;
 		CubeMesh->MicroChunkResolution = MicroResolution;

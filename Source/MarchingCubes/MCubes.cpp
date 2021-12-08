@@ -108,6 +108,7 @@ void AMCubes::Tick(float DeltaTime)
 			// UE_LOG(LogClass, Error, TEXT("DELETING chunk %s"), *(GetActorLocation().ToCompactString()));
 			/*ChunkList->Remove(GetActorLocation());
 			Destroy();*/
+			IgnorePositions->Add(GetActorLocation());
 			Destroy();
 		}
 		MeshTris.Empty();
@@ -179,21 +180,9 @@ void AMCubes::BeginMarch()
 	TArray<FVector2D> UVs;
 	TArray<int> TriInds;
 
-	// uint32 MaxMarchesX = FMath::Floor(MeshXDimension*(100.0 / doubleMicroChunkResolution)) - 1;
-	// uint32 MaxMarchesY = FMath::Floor(MeshYDimension*(100.0 / doubleMicroChunkResolution)) - 1;
-	// uint32 MaxMarchesZ = FMath::Floor(MeshZDimension*(100.0 / doubleMicroChunkResolution)) - 1;
-
 	uint32 MaxMarchesX = FGenericPlatformMath::CeilToInt(MeshXDimension*(100.0 / double(MicroChunkResolution)));
 	uint32 MaxMarchesY = FGenericPlatformMath::CeilToInt(MeshYDimension*(100.0 / double(MicroChunkResolution)));
 	uint32 MaxMarchesZ = FGenericPlatformMath::CeilToInt(MeshZDimension*(100.0 / double(MicroChunkResolution)));
-
-	// uint32 MaxMarchesX = MeshXDimension - 1;// FMath::Floor(MeshXDimension*(100.0 / doubleMicroChunkResolution)) - 1;
-	// uint32 MaxMarchesY = MeshYDimension - 1;// FMath::Floor(MeshYDimension*(100.0 / doubleMicroChunkResolution)) - 1;
-	// uint32 MaxMarchesZ = MeshZDimension - 1;// FMath::Floor(MeshZDimension*(100.0 / doubleMicroChunkResolution)) - 1;
-
-	// uint64 MarchesToMake = MaxMarchesX * MaxMarchesY * MaxMarchesZ;
-
-	// double LastPercent = 0;
 
 	// Cycles through all Z planes
 	for(uint32 ZIndex = 0; ZIndex < MaxMarchesZ; ZIndex++)
@@ -204,17 +193,6 @@ void AMCubes::BeginMarch()
 			// Cycles through each X point to acces a voxel
 			for (uint32 XIndex = 0; XIndex < MaxMarchesX; XIndex++)
 			{
-
-				// uint64 MarchesDone = XIndex + (YIndex * MaxMarchesX) + (ZIndex * (MaxMarchesY * MaxMarchesX));
-
-				// double PercentageDone = (double(MarchesDone)*100.0) / double(MarchesToMake);
-
-				/* if(PercentageDone > LastPercent)
-				{
-					// UE_LOG(LogClass, Warning, TEXT("%.2f%% complete! %i/%i marches done."), PercentageDone, MarchesDone, MarchesToMake);
-					LastPercent += 0.25;
-				}*/
-
 				FOccluderVertexArray MemberTriVerts/* , MemberNorms */;
 				// TArray<FProcMeshTangent> MemberTans;
 				TArray<FVector2D> MemberUVs;

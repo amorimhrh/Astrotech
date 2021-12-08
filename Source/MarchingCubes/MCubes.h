@@ -94,6 +94,7 @@ public:
 	// Shared Variables
 	TArray<uint16>* EdgeTable;
 	TArray<FLookupCell>* TriTable;
+	TArray<FVector>* IgnorePositions;
 	class UMaterialInterface* MeshMaterial;
 	uint8* RenderDistance;
 	AMCParent* RootParent;

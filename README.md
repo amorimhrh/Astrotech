@@ -1,6 +1,12 @@
 # Astrotech
+![GitHub](https://img.shields.io/github/license/amorimhrh/Astrotech)
+![Lines of code](https://img.shields.io/tokei/lines/github/amorimhrh/Astrotech)
 
-**add screenshots/gifs here after you commit pls :)**
+<p align="center">
+  <img src="https://github.com/amorimhrh/Astrotech/blob/dev/READMEImages/photo-a.gif?raw=true" alt="Astrotech Main Menu"/>
+  <img src="https://github.com/amorimhrh/Astrotech/blob/dev/READMEImages/photo-b.gif?raw=true" alt="Astrotech Annihilator"/>
+  <img src="https://github.com/amorimhrh/Astrotech/blob/dev/READMEImages/photo-c.gif?raw=true" alt="Astrotech Planet"/>
+</p>
 
 ## Introduction
 

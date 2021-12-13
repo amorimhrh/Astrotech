@@ -21,11 +21,6 @@ AMCubes::AMCubes()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	// Mesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("ProceduralMesh"));
-	// RootComponent = Mesh;
-
-	// Mesh->bUseAsyncCooking = true;
-
 	StaticProvider = NewObject<URuntimeMeshProviderStatic>(this, TEXT("RuntimeMeshProvider-Static"));
 	if(StaticProvider) { GetRuntimeMeshComponent()->Initialize(StaticProvider); }
 }
@@ -46,11 +41,7 @@ void AMCubes::BeginPlay()
 	// Sets current seconds counter to 0
 	Self = this;
 
-	// const FVector DebugOffset = FVector((MeshXDimension/2)*MicroChunkResolution, (MeshYDimension/2)*MicroChunkResolution, (MeshZDimension/2)*MicroChunkResolution);
-
-	// DrawDebugBox(AMCubes::GetWorld(), AMCubes::GetActorLocation() + DebugOffset, DebugOffset, FColor().Cyan, true, -1.f, (uint8)'\000', 5.f);
-
-	MCTask = new FAutoDeleteAsyncTask<MarchingCubesAlgorithm>(Self/*, MeshTris, bBegunCalculations, bFinishedCalculations*/);
+	MCTask = new FAutoDeleteAsyncTask<MarchingCubesAlgorithm>(Self);
 	MCTask->StartBackgroundTask();
 }
 
@@ -58,8 +49,6 @@ void AMCubes::BeginPlay()
 void AMCubes::BeginDestroy()
 {
 	Super::BeginDestroy();
-
-	// if(bBegunCalculations && !bFinishedCalculations) { MCTask->Cancel(); }
 }
 
 // Called every frame
@@ -75,25 +64,14 @@ void AMCubes::Tick(float DeltaTime)
 		{
 			ChunkList->Remove(GetActorLocation());
 			Destroy();
-			//SetActorHiddenInGame(true);
 		}
 		CurrentSeconds -= 1;
 	}
-
-	/*if((SurfaceLevel != LastSurfaceLevel || PNoise1 != LastPNoise) && !bBegunCalculations)
-	{
-		(new FAutoDeleteAsyncTask<MarchingCubesAlgorithm>(Self))->StartBackgroundTask();
-		LastSurfaceLevel = SurfaceLevel;
-		LastPNoise = PNoise1;
-	}*/
 
 	if(bFinishedCalculations)
 	{
 		if(MeshTris.Num() > 0)
 		{
-			// UE_LOG(LogClass, Warning, TEXT("Trying to create mesh!"));
-			// Mesh->ClearAllMeshSections();
-			// UE_LOG(LogClass, Warning, TEXT("Entering creation."));
 			AMCubes::CreateTriangle();
 			if((*ChunkList).Contains(GetActorLocation())) 
 			{ 
@@ -106,8 +84,6 @@ void AMCubes::Tick(float DeltaTime)
 		else
 		{
 			// UE_LOG(LogClass, Error, TEXT("DELETING chunk %s"), *(GetActorLocation().ToCompactString()));
-			/*ChunkList->Remove(GetActorLocation());
-			Destroy();*/
 			IgnorePositions->Add(GetActorLocation());
 			Destroy();
 		}
@@ -123,41 +99,13 @@ void AMCubes::Tick(float DeltaTime)
 void AMCubes::PostLoad()
 {
 	Super::PostLoad();
-	// AMCubes::CreateTriangle(FVector(0, 0, 0), {FVector(0, 0, 0), FVector(0, MicroChunkResolution, 0), FVector(0, 0, MicroChunkResolution)});
 }
 */
 
 // Triangle creation
 void AMCubes::CreateTriangle(/*const FVector& OriginPoint, const TArray<FVector>& VertexList*/)
 {
-	/*TArray<FVector> Vertices;
-	TArray<int> Triangles;
-	TArray<FVector> Normals;
-	TArray<FVector2D> UV0;
-	TArray<FProcMeshTangent> Tangents;*/
 	TArray<FColor> VertexColors;
-
-	/*for(const FVector& PointToTri : VertexList)
-	{
-		int VertexCount = Vertices.Num();
-		Vertices.Add(OriginPoint + PointToTri - AMCubes::GetActorLocation());
-		Triangles.Add(VertexCount++);
-		// VertexColors.Add(FLinearColor(0.5, 0.5, 0.5, 1));
-
-		// uint8 IndexMod = Index % 3;
-		// UV0.Add(FVector2D((IndexMod == 1 ? 1 : 0), (IndexMod == 2 ? 1 : 0)));
-		UV0.Add(FVector2D(PointToTri.X/MicroChunkResolution, PointToTri.Y/MicroChunkResolution));
-	}*/
-
-
-	// uint_t MeshNumSec = Mesh->GetNumSections();
-
-	// AMCubes::CalculateTangentsForMeshCommented(Vertices, Triangles, UV0, Normals, Tangents);
-	// Mesh->CreateMeshSection(0, MeshTris, MeshTriIndices, MeshNorms, MeshUVs, VertexColors, MeshTans, true);
-
-	// Mesh->ContainsPhysicsTriMeshData(true);
-
-	// Mesh->SetMaterial(0, MeshMaterial);
 
 	StaticProvider->SetupMaterialSlot(0, TEXT("Mat"), MeshMaterial);
 
@@ -172,7 +120,6 @@ void AMCubes::CreateTriangle(/*const FVector& OriginPoint, const TArray<FVector>
 void AMCubes::BeginMarch()
 {
 	// UE_LOG(LogClass, Warning, TEXT("MARCHING chunk %s"), *(GetActorLocation().ToCompactString()));
-	// FlushPersistentDebugLines(AMCubes::GetWorld());
 
 	const TArray<uint8> Increments = {1, 2, 8, 4, 16, 32, 128, 64};
 	FOccluderVertexArray TriVerts, Norms;
@@ -193,15 +140,12 @@ void AMCubes::BeginMarch()
 			// Cycles through each X point to acces a voxel
 			for (uint32 XIndex = 0; XIndex < MaxMarchesX; XIndex++)
 			{
-				FOccluderVertexArray MemberTriVerts/* , MemberNorms */;
-				// TArray<FProcMeshTangent> MemberTans;
+				FOccluderVertexArray MemberTriVerts;
 				TArray<FVector2D> MemberUVs;
 				TArray<int> MemberTriInds;
 
-				// FOccluderVertexArray TriVerts;
 				// Store current vector coordinate
 				FVector CurrentCoordinate = FVector(XIndex*MicroChunkResolution, YIndex*MicroChunkResolution, ZIndex*MicroChunkResolution);
-				// if (bRenderDebug) { DrawDebugSphere(AMCubes::GetWorld(), AMCubes::GetActorLocation() + (VoxelVertexCoordinate * AMCubes::GetActorScale3D()), 25, 10, (MCPoints[VoxelVertexCoordinate] >= SurfaceLevel) ? FColor::Emerald : FColor::Black, true); }
 
 				// UE_LOG(LogClass, Warning, TEXT("CurrentCoordinate = %s"), *CurrentCoordinate.ToString());
 
@@ -261,40 +205,24 @@ void AMCubes::BeginMarch()
 				// Add each triangle vertex to list
 				for(uint8 TriangleIndex = 0; TriTableValue[TriangleIndex] != -1; TriangleIndex += 3)
 				{
-					// FOccluderVertexArray MemberTriVerts, MemberNorms;
-					// TArray<FProcMeshTangent> MemberTans;
-					// TArray<FVector2D> MemberUVs;
-					// TArray<int> MemberTriInds;
-
 					int VertNum = TriVerts.Num() + MemberTriInds.Num();
-					// FOccluderVertexArray TriVerts;
+
 					MemberTriInds.Add(VertNum++);
-					MemberTriVerts.Add(TriangleVertices[TriTableValue[TriangleIndex]]/*  - AMCubes::GetActorLocation() */);
+					MemberTriVerts.Add(TriangleVertices[TriTableValue[TriangleIndex]]);
 					MemberUVs.Add(FVector2D(TriangleVertices[TriTableValue[TriangleIndex]].X/MicroChunkResolution, TriangleVertices[TriTableValue[TriangleIndex]].Y/MicroChunkResolution));
 
 					MemberTriInds.Add(VertNum++);
-					MemberTriVerts.Add(TriangleVertices[TriTableValue[TriangleIndex + 1]]/*  - AMCubes::GetActorLocation() */);
+					MemberTriVerts.Add(TriangleVertices[TriTableValue[TriangleIndex + 1]]);
 					MemberUVs.Add(FVector2D(TriangleVertices[TriTableValue[TriangleIndex + 1]].X/MicroChunkResolution, TriangleVertices[TriTableValue[TriangleIndex + 1]].Y/MicroChunkResolution));
 
 					MemberTriInds.Add(VertNum++);
-					MemberTriVerts.Add(TriangleVertices[TriTableValue[TriangleIndex + 2]]/*  - AMCubes::GetActorLocation() */);
+					MemberTriVerts.Add(TriangleVertices[TriTableValue[TriangleIndex + 2]]);
 					MemberUVs.Add(FVector2D(TriangleVertices[TriTableValue[TriangleIndex + 2]].X/MicroChunkResolution, TriangleVertices[TriTableValue[TriangleIndex + 2]].Y/MicroChunkResolution));
-					// AMCubes::CreateTriangle(FVector(0, 0, 0), TriVerts);
-					// AMCubes::CalculateTangentsForMeshCommented(MemberTriVerts, MemberTriInds, MemberUVs, MemberNorms, MemberTans);
-					// TriVerts += MemberTriVerts;
-					// TriInds += MemberTriInds;
-					// UVs += MemberUVs;
-					// Norms += MemberNorms;
-					// Tans += MemberTans;
 				}
-				// AMCubes::CreateTriangle(FVector(0, 0, 0), TriVerts);
-				// AMCubes::CalculateTangentsForMeshCommented(MemberTriVerts, MemberTriInds, MemberUVs, MemberNorms, MemberTans);
 
 				TriVerts += MemberTriVerts;
 				TriInds += MemberTriInds;
 				UVs += MemberUVs;
-				// Norms += MemberNorms;
-				// Tans += MemberTans;
 
 				// UE_LOG(LogClass, Warning, TEXT("First few triangles: %i, %i, %i (Actual length: %i)"), MemberTriInds[0], MemberTriInds[1], MemberTriInds[2], TriInds.Num());
 			}
@@ -307,16 +235,10 @@ void AMCubes::BeginMarch()
 
 	// UE_LOG(LogClass, Warning, TEXT("Vertices: %i"), TriVerts.Num());
 
-	/*UE_LOG(LogClass, Warning, TEXT("Calculating tangents."));
-	AMCubes::CalculateTangentsForMeshCommented(TriVerts, TriInds, UVs, Norms, Tans);*/
 	MeshTris = TriVerts;
 	MeshTriIndices = TriInds;
 	MeshUVs = UVs;
-	// MeshNorms = Norms;
-	// MeshTans = Tans;
-	// Build mesh if it has triangles to build
-	//if (TriVerts.Num() == 0) { return; }
-	//AMCubes::CreateTriangle(FVector(0, 0, 0), TriVerts);
+
 	// UE_LOG(LogClass, Warning, TEXT("Mesh sections: %i"), Mesh->GetNumSections());
 	// UE_LOG(LogClass, Warning, TEXT("Vert Number: %i"), TriVerts.Num());
 }
@@ -330,8 +252,7 @@ float AMCubes::DensityFunction(const FVector& Point) const
 {
 	const FVector PointBroken3D = Point / FVector(101,103,107);
 	const FVector2D PointBroken = FVector2D(Point.X / 101, Point.Y / 103);
-
-	// float Density = (-Point.Z / MicroChunkResolution); // Creates flat ground;
+	
 	float Density = 0;
 
 	for(int Index = 1; Index < 8; Index++)
@@ -357,34 +278,18 @@ float AMCubes::DensityFunction(const FVector& Point) const
 
 	Density *= WalkingWeight;
 
-	// if(FMath::RandRange(0,10000) == 5) { UE_LOG(LogClass, Warning, TEXT("WW Value: %f"), WalkingWeight) }
-
 	Density += (1 - WalkingWeight) * (*WalkHeight);
 
-	// Density += (*BaseHeight);
 	Density -= (WalkingWeight + ((1 - WalkingWeight)*(*OverhangPresence))) * FMath::PerlinNoise3D(PointBroken3D * RootParent->Frequencies[9]) * RootParent->Amplitudes[9]; // 0.0078127f) * 128.0f;
 
 	Density += FMath::PerlinNoise2D(PointBroken * RootParent->Frequencies[0]) * RootParent->Amplitudes[0];
 
-
-	
-	// float PlateauValue = (*PlateauIntensity) * ((*PlateauHeight) * FMath::Floor(double((*PlateauTotalHeight) * FMath::PerlinNoise2D(PointBroken * RootParent->Frequencies[9]))/double(*PlateauHeight)));
-
 	Density += ((*SedimentWeight) * FMath::PerlinNoise1D(PointBroken3D.Z * (*SedimentFrequency)));
-	// Density /= PlateauValue < (*PlateauBias) ? 1 : PlateauValue;
 	
-	// Density += PlateauValue;
+	Density += (*BaseHeight);
 
 	Density -= Point.Z / 100; // Creates flat ground;
-	// Density *= ((*SedimentWeight) * FMath::PerlinNoise1D(PointBroken3D.Z * (*SedimentFrequency))) + 1;
 
-
-	// Density -= FMath::PerlinNoise3D(PointBroken3D * 0.062476) * 16; // 0.0078127f) * 128.0f;
-	// Density += (cos(Point.X / MicroChunkResolution0) * sin(Point.Y / MicroChunkResolution0))*10;
-	// Density += FMath::PerlinNoise2D(PointBroken * 0.06261f) * 16.0f;
-	// Density += FMath::PerlinNoise2D(PointBroken * 0.03124f) * 32.0f;
-	// Density += FMath::PerlinNoise2D(PointBroken * 0.015623f) * 64.0f;
-	// (-Point.Z / MicroChunkResolution) + PNoise1 * FMath::PerlinNoise3D()
 	return Density;
 }
 

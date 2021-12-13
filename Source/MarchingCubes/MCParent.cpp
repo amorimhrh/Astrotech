@@ -174,21 +174,7 @@ void AMCParent::SpawnMesh(const FVector& Location, const int32& MicroResolution)
 {
 	// UE_LOG(LogClass, Warning, TEXT("Spawning Mesh."));
 	if(!bAlreadyCreated) { bAlreadyCreated = true; }
-	/*if(Chunks.Contains(Location)) 
-	{
-		if(bArraysChanged)
-		{ 
-			Chunks[Location]->Destroy();
-			Chunks.Remove(Location);
-			UE_LOG(LogClass, Warning, TEXT("Changed frequency or amplitude!"));
-		}
-		// UE_LOG(LogClass, Warning, TEXT("Chunk %s already exists!"), *Location.ToString());
-		else
-		{
-			Chunks[Location]->SetActorHiddenInGame(false);
-		}
-	}
-	else*/
+	
 	{
 		AMCubes* CubeMesh = AMCParent::GetWorld()->SpawnActorDeferred<AMCubes>(AMCubes::StaticClass(), FTransform(Location), this);
 		CubeMesh->RootParent = this;
@@ -212,8 +198,6 @@ void AMCParent::SpawnMesh(const FVector& Location, const int32& MicroResolution)
 		CubeMesh->SedimentFrequency = &SedimentFrequency;
 		CubeMesh->MicroChunkResolution = MicroResolution;
 		CubeMesh->FinishSpawning(FTransform(Location));
-		// CubeMesh->SetOwner(this);
-		// Chunks.Add(Location, CubeMesh);
 	}
 }
 

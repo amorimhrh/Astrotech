@@ -11,62 +11,68 @@ class MARCHINGCUBES_API AMCParent : public AActor
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
+	/** Determines the material applied to the generated chunks. */ UPROPERTY(EditAnywhere)
 		class UMaterialInterface* MeshMaterial;
 
-	UPROPERTY(EditAnywhere)
-		bool bCreateOnlyOne;
-
-	UPROPERTY(EditAnywhere)
+	/** Only generate terrain once? */ UPROPERTY(EditAnywhere, meta = (DisplayName = "Generate once?"))
 		bool bCreateOnlyOnce;
 
-	UPROPERTY(EditAnywhere)
+	/** Only create a single chunk? */ UPROPERTY(EditAnywhere, meta = (DisplayName = "Only one chunk?"))
+		bool bCreateOnlyOne;
+
+	/** Where to create single chunk. */ UPROPERTY(EditAnywhere, meta = (EditCondition = "bCreateOnlyOne"))
 		FVector SingleChunkSpawnLocation;
 
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "0", UIMin = "0", ClampMax = "32", UIMax = "32"))
+	/** How far away chunks are generated. */ UPROPERTY(EditAnywhere, meta = (ClampMin = "0", UIMin = "0", ClampMax = "32", UIMax = "32"))
 		uint8 RenderDistance;
 
-	UPROPERTY(EditAnywhere)
+	/** Should you ignore certain z values when generating chunks? */ UPROPERTY(EditAnywhere)
 		bool bLimitRenderHeight;
 
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "-16", UIMin = "-16", ClampMax = "0", UIMax = "0"))
+	/** Doesn't generate chunks below this z value. */ UPROPERTY(EditAnywhere, meta = (EditCondition = "bLimitRenderHeight", ClampMin = "-16", UIMin = "-16", ClampMax = "0", UIMax = "0"))
 		int8 RenderHeightMin = -16;
 
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "0", UIMin = "0", ClampMax = "16", UIMax = "16"))
+	/** Doesn't generate chunks above this z value. */ UPROPERTY(EditAnywhere, meta = (EditCondition = "bLimitRenderHeight", ClampMin = "0", UIMin = "0", ClampMax = "16", UIMax = "16"))
 		int8 RenderHeightMax = 16;
 
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "0", UIMin = "0", UIMax = "32"))
+	/** How many 100-units large is a chunk. */ UPROPERTY(EditAnywhere, meta = (ClampMin = "0", UIMin = "0", UIMax = "32"))
 		uint8 ChunkSize = 8;
 
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "1", UIMin = "1", ClampMax = "10000", UIMax = "10000"))
+	/** How large a single march is. */ UPROPERTY(EditAnywhere, meta = (ClampMin = "1", UIMin = "1", ClampMax = "10000", UIMax = "10000"))
 		uint16 MicroChunkResolution = 100; 
 
-	UPROPERTY(EditAnywhere)
+	/** Offsets camera chunk location by this amount. */ UPROPERTY(EditAnywhere)
 		FVector ChunkSpawnOffset;
 
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "0", UIMin = "0", ClampMax = "1", UIMax = "1"))
+	/** Lowest value of flat-terrain perlin noise to consider.
+	 * 
+	 *  Min = Epsilon and Max = 0 completely deactivates flat terrains.
+	 *  Min = 1 and Max =/= 1 completely deactivates mountainous terrains.  */ UPROPERTY(EditAnywhere, meta = (ClampMin = "0", UIMin = "0", ClampMax = "1", UIMax = "1"))
 		double MinimumCutoff;
 
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "0", UIMin = "0", ClampMax = "1", UIMax = "1"))
+	/** Highest value of flat-terrain perlin noise to consider. 
+	 * 
+	 *  Min = Epsilon and Max = 0 completely deactivates flat terrains.
+	 *  Min = 1 and Max =/= 1 completely deactivates mountainous terrains.  */ UPROPERTY(EditAnywhere, meta = (ClampMin = "0", UIMin = "0", ClampMax = "1", UIMax = "1"))
 		double MaximumCutoff;
 
-	UPROPERTY(EditAnywhere)
+	/** How smooth the transition between masked and unmasked parts is. */ UPROPERTY(EditAnywhere)
 		double CutoffPower;
 
-	UPROPERTY(EditAnywhere)
+	/** Translates terrain in z-axis. */ UPROPERTY(EditAnywhere)
 		double BaseHeight;
 
-	UPROPERTY(EditAnywhere)
+	/** Defines flat terrain height. */ UPROPERTY(EditAnywhere)
 		double WalkHeight;
 
 
-	UPROPERTY(EditAnywhere)
+	/** Sediment noise amplitude. */ UPROPERTY(EditAnywhere, meta = (DisplayName = "Sediment Amplitude"))
 		double SedimentWeight;
 
-	UPROPERTY(EditAnywhere)
+	/** Sediment noise frequency. */ UPROPERTY(EditAnywhere)
 		double SedimentFrequency;
 
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "0", UIMin = "0", ClampMax = "1", UIMax = "1"))
+	/** How strong the subtractive 3D perlin noise is on the flat terrain. */ UPROPERTY(EditAnywhere, meta = (ClampMin = "0", UIMin = "0", ClampMax = "1", UIMax = "1"))
 		double OverhangPresence;
 	
 public:	
@@ -84,10 +90,22 @@ public:
 	bool ArrayChanged(const TArray<float>& ArrayA, const TArray<float>& ArrayB) const;
 	APlayerCameraManager* CamMgr;
 
-	UPROPERTY(EditAnywhere)
+	/** Must contain 11 variables. Frequency multiplies coordinates.
+	 * 
+	 *  0: Base noise frequency. 
+	 *  1-7: Mountainous Perlin noise frequency. 
+	 *  8: Mountainous domain-warped Perlin noise frequency.
+	 *  9: Subtractive 3D Perlin noise frequency.
+	 *  10: Walking mask noise frequency. */ UPROPERTY(EditAnywhere)
 		TArray<float> Frequencies;
 
-	UPROPERTY(EditAnywhere)
+	/** Must contain 11 variables. Putting it at 0 deactivates the layer of noise.
+	 * 
+	 *  0: Base noise amplitude. 
+	 *  1-7: Mountainous Perlin noise amplitude. 
+	 *  8: Mountainous domain-warped Perlin noise amplitude.
+	 *  9: Subtractive 3D Perlin noise amplitude.
+	 *  10: Walking mask noise amplitude. */ UPROPERTY(EditAnywhere)
 		TArray<float> Amplitudes;
 
 

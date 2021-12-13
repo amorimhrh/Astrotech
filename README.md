@@ -1,5 +1,5 @@
 # Astrotech
-![GitHub](https://img.shields.io/github/license/amorimhrh/Astrotech)
+[![GitHub](https://img.shields.io/github/license/amorimhrh/Astrotech)](https://raw.githubusercontent.com/amorimhrh/Astrotech/master/LICENSE.md)
 ![Lines of code](https://img.shields.io/tokei/lines/github/amorimhrh/Astrotech)
 
 <p align="center">

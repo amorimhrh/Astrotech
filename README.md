@@ -16,15 +16,15 @@ On this GitHub repo, you can see the specific project files, scripts and bluepri
 
 ## How To Install Unreal Project
 
-Clone this repository onto your machine, and open up the **MachineCubes.uproject** using UE 4.27.
+Clone this repository onto your machine, and open up the **MachineCubes.uproject** file using UE 4.27.
 
 ## Levels
 
 The project opens up on the Main Menu level, located in the **Content/Levels** folder. On the same folder, two other levels can be seen, those being used as control environments for testing code on different terrains.
 
-The **Content/Levels/CinematicLevels** directory contains levels with Level Sequences, and were used to record footage for presentations and/or videos.
+The **Content/Levels/CinematicLevels** directory contains levels with Level Sequences, which were used to record footage for presentations and/or videos.
 
-The **Content/Levels/Planets** folder contains 4 examples of different planets, all generated procedurally using the Marching Cubes algorithm.
+The **Content/Levels/Planets** folder contains 4 examples of different planets, all of which are procedurally generated in real time using the Marching Cubes algorithm.
 
 Finally, the **Content/Level/Spaceships** directory has various versions of the SLSS.
 

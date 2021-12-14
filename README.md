@@ -1,6 +1,5 @@
 # Astrotech
 [![GitHub](https://img.shields.io/github/license/amorimhrh/Astrotech)](https://raw.githubusercontent.com/amorimhrh/Astrotech/master/LICENSE.md)
-![Lines of code](https://img.shields.io/tokei/lines/github/amorimhrh/Astrotech)
 
 <p align="center">
   <img src="https://github.com/amorimhrh/Astrotech/blob/dev/READMEImages/photo-a.gif?raw=true" alt="Astrotech Main Menu"/>
@@ -20,7 +19,11 @@ Clone this repository onto your machine, and open up the **MachineCubes.uproject
 
 ## Levels
 
-The project opens up on the Main Menu level, located in the **Content/Levels** folder. On the same folder, two other levels can be seen, those being used as control environments for testing code on different terrains.
+The project opens up on the Main Menu level, located in the **Content/Levels** folder. 
+
+On the same folder, four directories can be seen:
+
+The **Content/Levels/TestLevels** folder has three test levels, the first two being used as control environments for testing code on different terrains, and the third one is used to test animations.
 
 The **Content/Levels/CinematicLevels** directory contains levels with Level Sequences, which were used to record footage for presentations and/or videos.
 
@@ -33,6 +36,10 @@ Finally, the **Content/Level/Spaceships** directory has various versions of the 
 ### 3D Models
 
 3D models created by the author can be seen inside the **Content/Meshes** folder. 
+
+### Animations
+
+Animations made by the author can be found in the **Content/Animations** folder.
 
 ### Blueprints
 

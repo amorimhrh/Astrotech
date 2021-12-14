@@ -45,6 +45,13 @@ void AMCubes::BeginPlay()
 	MCTask->StartBackgroundTask();
 }
 
+// Updates chunk
+void AMCubes::UpdateMesh()
+{
+	MCTask = new FAutoDeleteAsyncTask<MarchingCubesAlgorithm>(Self);
+	MCTask->StartBackgroundTask();
+}
+
 // Called when the actor is being destroyed
 void AMCubes::BeginDestroy()
 {
@@ -56,30 +63,11 @@ void AMCubes::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	CurrentSeconds += DeltaTime;
-
-	if(CurrentSeconds >= 1)
-	{
-		if(FVector::Dist(RootParent->CamMgr->GetCameraLocation() + (*ChunkOffset * FakeVolume), GetActorLocation()) > (*RenderDistance + 3) * FakeVolume) 
-		{
-			ChunkList->Remove(GetActorLocation());
-			Destroy();
-		}
-		CurrentSeconds -= 1;
-	}
-
 	if(bFinishedCalculations)
 	{
 		if(MeshTris.Num() > 0)
 		{
 			AMCubes::CreateTriangle();
-			if((*ChunkList).Contains(GetActorLocation())) 
-			{ 
-				AActor* ChunkToDelete = (*ChunkList)[GetActorLocation()];
-				ChunkList->Remove(GetActorLocation()); 
-				ChunkToDelete->Destroy();
-			}
-			ChunkList->Add(GetActorLocation(), this);
 		}
 		else
 		{
@@ -111,7 +99,8 @@ void AMCubes::CreateTriangle(/*const FVector& OriginPoint, const TArray<FVector>
 
 	// UE_LOG(LogClass, Warning, TEXT("Creating mesh section."));
 
-	StaticProvider->CreateSectionFromComponents(0, 0, 0, MeshTris, MeshTriIndices, MeshNorms, MeshUVs, VertexColors, MeshTans, ERuntimeMeshUpdateFrequency::Infrequent, true);
+	if(!bAlreadyCreatedOnce) StaticProvider->CreateSectionFromComponents(0, 0, 0, MeshTris, MeshTriIndices, MeshNorms, MeshUVs, VertexColors, MeshTans, ERuntimeMeshUpdateFrequency::Average, true);
+	else StaticProvider->UpdateSectionFromComponents(0, 0, MeshTris, MeshTriIndices, MeshNorms, MeshUVs, VertexColors, MeshTans);
 
 	// UE_LOG(LogTemp, Warning, TEXT("Made mesh on section 0 with %i vertices"), MeshTris.Num());
 }

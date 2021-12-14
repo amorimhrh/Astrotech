@@ -86,6 +86,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	void CreateTriangle(/*const FVector& OriginPoint, const TArray<FVector>& VertexList*/);
 	void BeginMarch();
+	void UpdateMesh();
 	FVector GetInterpolatedPosition(const FVector& P1, const FVector& P2, const float& V1, const float& V2) const;
 	float DensityFunction(const FVector& Point) const;
 	void CalculateTangentsForMeshCommented(const TArray<FVector>& Vertices, const TArray<int32>& Triangles, const TArray<FVector2D>& UVs, TArray<FVector>& Normals, TArray<FProcMeshTangent>& Tangents);
@@ -128,6 +129,8 @@ private:
 	// TMap<FVector, float> MCPoints; // This map with vectors as keys will store the numbers which will determine a point's threshold
 	
 	float LastSurfaceLevel = 0, LastPNoise = 0;
+
+	bool bAlreadyCreatedOnce = false;
 
 	FAutoDeleteAsyncTask<MarchingCubesAlgorithm>* MCTask;
 

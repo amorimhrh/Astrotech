@@ -70,12 +70,11 @@ void AMCParent::Tick(float DeltaTime)
 	{
 		int8 XValue = 0, YValue = 0, ZValue = 0;
 		uint8 LoopState = 0, MaxVal = 1;
-		uint32 Iter = 0;
 		TArray<FVector> VisitedChunks;
 		bool bFinishedCircling = false;
 
 
-		while(!bFinishedCircling || Iter < 3)
+		while(!bFinishedCircling)
 		{
 			// Save chunk coordinate to variable
 
@@ -107,8 +106,13 @@ void AMCParent::Tick(float DeltaTime)
 				{
 					if(ChunkResolutions[NewChunkPos] != Res)
 					{
+						ChunkResolutions.Remove(NewChunkPos);
 						if(!bCreateOnlyOne) { OccupiedPositions.Add(NewChunkPos); }
-						AMCParent::SpawnMesh(NewChunkPos, Res);
+						
+						AMCubes* ChunkToUpdate = Cast<AMCubes>(Chunks[NewChunkPos]);
+						ChunkToUpdate->MicroChunkResolution = Res;
+						ChunkToUpdate->UpdateMesh();
+
 						ChunkResolutions.Add(NewChunkPos, Res);
 					}
 				}
@@ -198,6 +202,8 @@ void AMCParent::SpawnMesh(const FVector& Location, const int32& MicroResolution)
 		CubeMesh->SedimentFrequency = &SedimentFrequency;
 		CubeMesh->MicroChunkResolution = MicroResolution;
 		CubeMesh->FinishSpawning(FTransform(Location));
+
+		Chunks.Add(Location, Cast<AActor>(CubeMesh));
 	}
 }
 

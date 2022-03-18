@@ -9,27 +9,29 @@
 
 ## Introduction
 
-Astrotech is an educational Virtual Reality game created with the Unreal Engine for the scientific research project **"Development of Immersive Technologies Applied to Astrobiology Teaching"**. This experience focuses specifically on the teaching of Astrobiology.
+Astrotech is an educational Virtual Reality game created with the Unreal Engine for the scientific research project **"Development of Immersive Metaverses Applied to Astrobiology Teaching"**, previously titled **"Development of Immersive Technologies Applied to Astrobiology Teaching"**. This experience focuses specifically on the teaching of Astrobiology.
 
 On this GitHub repo, you can see the specific project files, scripts and blueprints that were used to create the experience. This repo is licensed under the MIT License, so you're free to use it under its terms.
 
 ## How To Install Unreal Project
 
-Clone this repository onto your machine, and open up the **MachineCubes.uproject** file using UE 4.27.
+Clone this repository onto your machine, and open up the **MarchingCubes.uproject** file using UE 4.27.
 
 ## Levels
 
 The project opens up on the Main Menu level, located in the **Content/Levels** folder. 
 
-On the same folder, four directories can be seen:
-
-The **Content/Levels/TestLevels** folder has three test levels, the first two being used as control environments for testing code on different terrains, and the third one is used to test animations.
+On the same folder, five directories can be seen:
 
 The **Content/Levels/CinematicLevels** directory contains levels with Level Sequences, which were used to record footage for presentations and/or videos.
 
-The **Content/Levels/Planets** folder contains 4 examples of different planets, all of which are procedurally generated in real time using the Marching Cubes algorithm.
+The **Content/Levels/LevelsWithScenes** folder contains levels with interactive cutscenes.
 
-Finally, the **Content/Level/Spaceships** directory has various versions of the SLSS.
+The **Content/Levels/Planets** directory contains 4 examples of different planets, all of which are procedurally generated in real time using the Marching Cubes algorithm.
+
+Finally, the **Content/Level/Spaceships** folder has various versions of the SLSS.
+
+The **Content/Levels/TestLevels** directory has four test levels, two being used as control environments for testing code on different terrains, one to test animations, and another to test widgets and movement.
 
 ## Files
 
@@ -41,9 +43,9 @@ Finally, the **Content/Level/Spaceships** directory has various versions of the 
 
 Animations made by the author can be found in the **Content/Animations** folder.
 
-### Blueprints
+### Audio Files
 
-Blueprints designed by the author can be found both in the **Content/Blueprints** folder.
+Audios created by the author can be found in the **Content/Audio** folder.
 
 ### C++ Scripts
 
@@ -56,6 +58,10 @@ Effects made by the author can be found inside the **Content/FX** folder.
 ### Materials
 
 Most materials created by the author can be seen inside the **Content/Materials** folder.
+
+### Pawns
+
+Pawns designed by the author can be found both in the **Content/Pawns** folder.
 
 ### Textures
 

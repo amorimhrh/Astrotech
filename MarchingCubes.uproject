@@ -51,6 +51,10 @@
 				"Win64",
 				"Mac"
 			]
+		},
+		{
+			"Name": "SoundVisualizations",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [
